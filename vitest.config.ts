@@ -11,5 +11,7 @@ export default defineConfig({
 	test: {
 		include: ["tests/**/*.test.ts"],
 		environment: "node",
+		// Fixed zone (UTC-3, no DST) so UTC conversions and offsets are deterministic.
+		env: { TZ: "America/Sao_Paulo" },
 	},
 });

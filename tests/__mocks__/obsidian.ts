@@ -10,8 +10,22 @@ export class Notice {
 
 export class Plugin {}
 
+export class Modal {}
+
+export class Setting {}
+
 export class PluginSettingTab {
 	constructor(_app: unknown, _plugin: unknown) {}
 }
 
 export class App {}
+
+export function debounce<T extends unknown[]>(fn: (...args: T) => unknown): (...args: T) => void {
+	return (...args: T) => {
+		fn(...args);
+	};
+}
+
+export function normalizePath(path: string): string {
+	return path;
+}
