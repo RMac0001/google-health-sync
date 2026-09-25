@@ -1,5 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
-import type GoogleHealthSyncPlugin from "./main";
+import { PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 
 export interface GoogleHealthSyncSettings {
 	/** Vault folder where synced notes are written. */
@@ -8,53 +7,50 @@ export interface GoogleHealthSyncSettings {
 	syncIntervalMinutes: number;
 }
 
+type SettingKey = keyof GoogleHealthSyncSettings;
+
 export const DEFAULT_SETTINGS: GoogleHealthSyncSettings = {
 	outputFolder: "Health",
 	syncIntervalMinutes: 0,
 };
 
+/**
+ * Settings are declared rather than rendered imperatively, so Obsidian renders them
+ * and indexes them for settings search. The base class reads from and persists to
+ * `plugin.settings`.
+ */
 export class GoogleHealthSyncSettingTab extends PluginSettingTab {
-	plugin: GoogleHealthSyncPlugin;
-
-	constructor(app: App, plugin: GoogleHealthSyncPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const { containerEl } = this;
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName("Output folder")
-			.setDesc("Folder in your vault where synced notes are written.")
-			.addText((text) =>
-				text
-					.setPlaceholder("Health")
-					.setValue(this.plugin.settings.outputFolder)
-					.onChange(async (value) => {
-						this.plugin.settings.outputFolder = value.trim();
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName("Auto-sync interval")
-			.setDesc("Minutes between automatic syncs. Set to 0 to disable.")
-			.addText((text) =>
-				text
-					.setPlaceholder("0")
-					.setValue(String(this.plugin.settings.syncIntervalMinutes))
-					.onChange(async (value) => {
-						this.plugin.settings.syncIntervalMinutes = parseSyncInterval(value);
-						await this.plugin.saveSettings();
-					}),
-			);
+	getSettingDefinitions(): SettingDefinitionItem<SettingKey>[] {
+		return [
+			{
+				name: "Output folder",
+				desc: "Folder in your vault where synced notes are written.",
+				control: {
+					type: "folder",
+					key: "outputFolder",
+					defaultValue: DEFAULT_SETTINGS.outputFolder,
+					placeholder: DEFAULT_SETTINGS.outputFolder,
+				},
+			},
+			{
+				name: "Auto-sync interval",
+				desc: "Minutes between automatic syncs. Set to 0 to disable.",
+				control: {
+					type: "number",
+					key: "syncIntervalMinutes",
+					defaultValue: DEFAULT_SETTINGS.syncIntervalMinutes,
+					min: 0,
+					step: 1,
+					validate: validateSyncInterval,
+				},
+			},
+		];
 	}
 }
 
-/** Parses a user-entered interval, falling back to 0 (disabled) for invalid input. */
-export function parseSyncInterval(value: string): number {
-	const minutes = Number.parseInt(value, 10);
-	return Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
+/** Returns an error message for an invalid interval, or nothing when it is valid. */
+export function validateSyncInterval(minutes: number): string | void {
+	if (!Number.isInteger(minutes) || minutes < 0) {
+		return "Enter a whole number of minutes, or 0 to disable.";
+	}
 }

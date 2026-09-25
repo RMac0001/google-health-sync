@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SETTINGS, parseSyncInterval } from "../src/settings";
+import { DEFAULT_SETTINGS, validateSyncInterval } from "../src/settings";
 
-describe("parseSyncInterval", () => {
-	it("parses positive integers", () => {
-		expect(parseSyncInterval("15")).toBe(15);
+describe("validateSyncInterval", () => {
+	it("accepts 0 and positive whole numbers", () => {
+		expect(validateSyncInterval(0)).toBeUndefined();
+		expect(validateSyncInterval(15)).toBeUndefined();
 	});
 
-	it("falls back to 0 for invalid or non-positive input", () => {
-		expect(parseSyncInterval("")).toBe(0);
-		expect(parseSyncInterval("abc")).toBe(0);
-		expect(parseSyncInterval("-5")).toBe(0);
+	it("rejects negative or fractional values", () => {
+		expect(validateSyncInterval(-5)).toBeTypeOf("string");
+		expect(validateSyncInterval(1.5)).toBeTypeOf("string");
+		expect(validateSyncInterval(Number.NaN)).toBeTypeOf("string");
 	});
 });
 

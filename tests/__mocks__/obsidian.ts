@@ -14,8 +14,4 @@ export class PluginSettingTab {
 	constructor(_app: unknown, _plugin: unknown) {}
 }
 
-export class Setting {
-	constructor(_containerEl: unknown) {}
-}
-
 export class App {}
