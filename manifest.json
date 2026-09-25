@@ -1,0 +1,9 @@
+{
+	"id": "google-health-sync",
+	"name": "Google Health Sync",
+	"version": "0.2.0",
+	"minAppVersion": "1.13.0",
+	"description": "Push daily calories eaten from your food logs to Google Health, and pull daily calories burned back into them.",
+	"author": "Roger MacRae",
+	"isDesktopOnly": true
+}

@@ -1,0 +1,12 @@
+/* Styles for the Google Health Sync plugin. Uses Obsidian CSS variables so themes apply. */
+
+.google-health-sync-status {
+	margin: var(--size-4-1) 0 0;
+	padding-inline-start: var(--size-4-4);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.google-health-sync-prompt-input {
+	width: 100%;
+}

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output (attached to GitHub releases, not committed)
+main.js
+*.js.map
+
+# Obsidian per-vault plugin data (may contain OAuth tokens)
+data.json
+
+# Test / tooling output
+coverage/
+
+# Editors & OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
