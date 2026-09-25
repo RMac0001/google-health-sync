@@ -7,7 +7,7 @@ export interface FoodLogStore {
 }
 
 export type JobResult =
-	| { status: "pushed"; kcal: number; withMacros?: boolean }
+	| { status: "pushed"; kcal: number }
 	| { status: "wrote"; kcal: number }
 	| { status: "unchanged"; kcal: number }
 	| { status: "no-food-log" }
@@ -35,7 +35,7 @@ export function readPositiveNumber(
 export function describeResult(result: JobResult): string {
 	switch (result.status) {
 		case "pushed":
-			return `pushed ${result.kcal}${result.withMacros ? " (with carbs/fat)" : ""}`;
+			return `pushed ${result.kcal}`;
 		case "wrote":
 			return `wrote ${result.kcal}`;
 		case "unchanged":

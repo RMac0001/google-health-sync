@@ -118,38 +118,73 @@ describe("pushIntake", () => {
 		});
 	});
 
-	it("falls back to real carbs and fat if Google requires them, never zeros", async () => {
+	// Sept 23 food log totals: protein 44+47+40+18 = 149, fat 23+17+13+8 = 61, carbs 46+40+38+28 = 152.
+	const SEPT_23 = { cal_total: 1753, carbs_total: 152, fat_total: 61, protein_total: 149 };
+
+	it("sends carbs, fat and protein with the calories", async () => {
 		const google = new FakeGoogle();
-		google.overrides.push((request) => {
-			if (request.method !== "POST" || !request.url.endsWith("nutrition-log/dataPoints"))
-				return undefined;
-			const log = (
-				JSON.parse(request.body ?? "{}") as { nutritionLog: Record<string, unknown> }
-			).nutritionLog;
-			if (log.totalCarbohydrate) return undefined;
-			return {
-				status: 400,
-				json: { error: { message: "nutrition_log.total_carbohydrate is required" } },
-			};
+		const store = new MemoryStore().add(DAY, SEPT_23);
+
+		expect(await pushIntake(DAY, store, google.client(), settings)).toEqual({
+			status: "pushed",
+			kcal: 1753,
 		});
+		expect(google.entries[0]?.nutritionLog).toMatchObject({
+			energy: { kcal: 1753 },
+			totalCarbohydrate: { grams: 152 },
+			totalFat: { grams: 61 },
+			energyFromFat: { kcal: 549 }, // 61 × 9
+			nutrients: [{ nutrient: "PROTEIN", quantity: { grams: 149 } }],
+		});
+		expect(await pushIntake(DAY, store, google.client(), settings)).toEqual({
+			status: "unchanged",
+			kcal: 1753,
+		});
+		expect(google.entries).toHaveLength(1);
+	});
+
+	it("replaces a calories-only entry so the macros get added", async () => {
+		const google = new FakeGoogle();
+		google.addEntry("Daily intake", 1753, NOON_UTC);
+		const store = new MemoryStore().add(DAY, SEPT_23);
+
+		expect(await pushIntake(DAY, store, google.client(), settings)).toEqual({
+			status: "pushed",
+			kcal: 1753,
+		});
+		expect(google.entries).toHaveLength(1);
+		expect(google.entries[0]?.nutritionLog.totalFat).toEqual({ grams: 61 });
+	});
+
+	it("replaces the entry when only a macro changes", async () => {
+		const google = new FakeGoogle();
+		const store = new MemoryStore().add(DAY, SEPT_23);
+		await pushIntake(DAY, store, google.client(), settings);
+		store.add(DAY, { ...SEPT_23, protein_total: 155 });
+
+		expect((await pushIntake(DAY, store, google.client(), settings)).status).toBe("pushed");
+		expect(google.entries).toHaveLength(1);
+		expect(google.entries[0]?.nutritionLog.nutrients).toEqual([
+			{ nutrient: "PROTEIN", quantity: { grams: 155 } },
+		]);
+	});
+
+	it("leaves out a missing or zero macro instead of sending 0", async () => {
+		const google = new FakeGoogle();
 		const store = new MemoryStore().add(DAY, {
 			cal_total: 1753,
-			carbs_total: 180.5,
-			fat_total: 60.3,
+			fat_total: 0,
+			protein_total: 149,
 		});
 
-		const result = await pushIntake(DAY, store, google.client(), settings);
+		await pushIntake(DAY, store, google.client(), settings);
 
-		expect(result).toEqual({ status: "pushed", kcal: 1753, withMacros: true });
-		expect(google.entries[0]?.nutritionLog).toMatchObject({
-			totalCarbohydrate: { grams: 180.5 },
-			totalFat: { grams: 60.3 },
-			energyFromFat: { kcal: 543 }, // 60.3 × 9 = 542.7
-		});
-
-		const noMacros = new MemoryStore().add(DAY, { cal_total: 1800 });
-		const failed = await pushIntake(DAY, noMacros, google.client(), settings);
-		expect(failed.status).toBe("error");
+		const log: Record<string, unknown> = google.entries[0]?.nutritionLog ?? {};
+		expect(log).not.toHaveProperty("totalCarbohydrate");
+		expect(log).not.toHaveProperty("totalFat");
+		expect(log).not.toHaveProperty("energyFromFat");
+		expect(log.nutrients).toEqual([{ nutrient: "PROTEIN", quantity: { grams: 149 } }]);
+		expect((await pushIntake(DAY, store, google.client(), settings)).status).toBe("unchanged");
 	});
 
 	it("reports a per-day error for a rejected request", async () => {

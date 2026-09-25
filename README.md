@@ -6,7 +6,7 @@ burned side by side, in both Google Health and your vault. Desktop only.
 Once a day (at a time you choose, default 03:00) it processes the previous day and does two
 independent jobs:
 
-1. **Push intake:** reads `cal_total` from that day's food log and sends it to Google Health
+1. **Push intake:** reads `cal_total` (plus carbs, fat and protein) from that day's food log and sends it to Google Health
    as one nutrition entry named "Daily intake".
 2. **Pull burn:** fetches that day's total calories burned (resting + active) from Google
    Health and writes it to `calories_burned` in the same food log.
@@ -66,17 +66,17 @@ The client secret and refresh token are kept in Obsidian's secret storage, not i
 
 ## Settings
 
-| Setting              | Default                                                          | Notes                                                                           |
-| -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Enable daily sync    | Off                                                              | Can only be turned on once connected.                                           |
-| Sync time            | `03:00`                                                          | 24-hour local time.                                                             |
-| Look-back days       | `3`                                                              | Days each run re-checks, 1–14.                                                  |
-| Food log path        | `Data/Food Logs/FL-{YYYY}/FL-{YYYY}-{MM}/FL-{YYYY}-{MM}-{DD}.md` | `{YYYY}`, `{MM}`, `{DD}` are replaced with the date.                            |
-| Intake property      | `cal_total`                                                      | Read from the food log and pushed to Google Health.                             |
-| Burn property        | `calories_burned`                                                | Written to the food log.                                                        |
-| Carbs / Fat property | `carbs_total` / `fat_total`                                      | Only used if Google refuses an entry with calories alone (see STATUS.md).       |
-| Entry name           | `Daily intake`                                                   | Name of the Google Health entry; entries with this name are replaced on change. |
-| Client ID / secret   | (empty)                                                          | From Google Cloud.                                                              |
+| Setting                        | Default                                                          | Notes                                                                             |
+| ------------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Enable daily sync              | Off                                                              | Can only be turned on once connected.                                             |
+| Sync time                      | `03:00`                                                          | 24-hour local time.                                                               |
+| Look-back days                 | `3`                                                              | Days each run re-checks, 1–14.                                                    |
+| Food log path                  | `Data/Food Logs/FL-{YYYY}/FL-{YYYY}-{MM}/FL-{YYYY}-{MM}-{DD}.md` | `{YYYY}`, `{MM}`, `{DD}` are replaced with the date.                              |
+| Intake property                | `cal_total`                                                      | Read from the food log and pushed to Google Health.                               |
+| Burn property                  | `calories_burned`                                                | Written to the food log.                                                          |
+| Carbs / Fat / Protein property | `carbs_total` / `fat_total` / `protein_total`                    | Grams, sent to Google Health with the calories. Missing or 0 values are left out. |
+| Entry name                     | `Daily intake`                                                   | Name of the Google Health entry; entries with this name are replaced on change.   |
+| Client ID / secret             | (empty)                                                          | From Google Cloud.                                                                |
 
 Every change is saved immediately; a short "settings saved" notice confirms it.
 

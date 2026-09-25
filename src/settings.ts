@@ -21,9 +21,10 @@ export interface GoogleHealthSyncSettings {
 	foodLogPath: string;
 	intakeProperty: string;
 	burnProperty: string;
-	/** Only used if Google refuses a calories-only nutrition entry. */
+	/** Macro totals (grams) sent with the calories. */
 	carbsProperty: string;
 	fatProperty: string;
+	proteinProperty: string;
 	entryName: string;
 	clientId: string;
 }
@@ -39,6 +40,7 @@ export const DEFAULT_SETTINGS: GoogleHealthSyncSettings = {
 	burnProperty: "calories_burned",
 	carbsProperty: "carbs_total",
 	fatProperty: "fat_total",
+	proteinProperty: "protein_total",
 	entryName: "Daily intake",
 	clientId: "",
 };
@@ -162,13 +164,18 @@ export class GoogleHealthSyncSettingTab extends PluginSettingTab {
 					},
 					{
 						name: "Carbs property",
-						desc: "Only used if Google refuses an entry with calories alone.",
+						desc: "Property with the day's carbs in grams. Sent to Google Health.",
 						control: { type: "text", key: "carbsProperty", validate: required },
 					},
 					{
 						name: "Fat property",
-						desc: "Only used if Google refuses an entry with calories alone.",
+						desc: "Property with the day's fat in grams. Sent to Google Health.",
 						control: { type: "text", key: "fatProperty", validate: required },
+					},
+					{
+						name: "Protein property",
+						desc: "Property with the day's protein in grams. Sent to Google Health.",
+						control: { type: "text", key: "proteinProperty", validate: required },
 					},
 				],
 			},

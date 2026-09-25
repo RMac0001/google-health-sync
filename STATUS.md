@@ -35,12 +35,13 @@ shapes were checked against the type definitions in Google's generated client,
   is required whenever `serving` is present, and it refers to a measurement-unit resource the
   plugin doesn't have. `serving` itself is optional. If Google turns out to require it, the
   create call will fail with a per-day error in Status.
-- **Carbs/fat fallback property names are settings** (`carbs_total`, `fat_total`) rather than
-  hard-coded, per the "no hardcoded property names" rule. The fallback only runs if Google
-  rejects a create with a 400 that names `total_carbohydrate`, `total_fat` or
-  `energy_from_fat`. It then sends the food log's real values (and
-  `energyFromFat = round(fat × 9)`); if either value is missing, that day is an error. It
-  never sends zeros. As of this version the fallback is not expected to trigger.
+- **Macros are sent too** (added in 0.2.2 at Roger's request; the spec was calories only).
+  Each entry carries `totalCarbohydrate`, `totalFat`, `energyFromFat = round(fat × 9)` and
+  protein as `nutrients: [{ nutrient: "PROTEIN", quantity: { grams } }]`, read from
+  `carbs_total`, `fat_total` and `protein_total` (all settings). A macro that is missing or
+  0 in the food log is left out rather than sent as 0. An existing entry counts as
+  "unchanged" only if calories and all three macros match (to 0.1 g), so calories-only entries
+  from earlier versions are replaced on the next run.
 - **A zero is treated as missing**, for both `cal_total` and Google's `kcalSum`: a food log
   whose total is 0 hasn't been filled in, and a 0 burn means no data. Neither is pushed or
   written.
