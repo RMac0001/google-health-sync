@@ -1,8 +1,9 @@
 # Implementation status
 
 Built from the Google Health Sync spec (Sep 24, 2026). Everything in the spec is implemented
-and covered by unit tests against a fake Google API. It has **not yet been run against the
-live Google Health API** — see "To verify" below.
+and covered by unit tests against a fake Google API. The core flow has been **verified
+against the live Google Health API** (Sep 25, 2026, v0.2.2); a few acceptance checks remain,
+see "To verify" below.
 
 ## Where the API details came from
 
@@ -66,21 +67,24 @@ shapes were checked against the type definitions in Google's generated client,
 
 ## Verified live
 
-- OAuth connect with all three scopes (0.2.0).
-- Burn pull: `total-calories` daily roll-up and writing `calories_burned` (0.2.0).
+Checked against Roger's Google account on Sep 25, 2026:
+
+- **Connect** (acceptance check 1): copy-paste OAuth; Status shows all three permissions
+  granted (0.2.0).
+- **Push intake** (check 2): one "Daily intake" entry of 1753 kcal for 2026-09-23, shown in
+  Google Health (0.2.1). The create is accepted without `serving`, and the
+  `civil_start_time` list filter works.
+- **Unchanged on rerun** (check 3): a second run reports "unchanged" for every day (0.2.1).
+- **Macros** (0.2.2): carbs, fat and protein appear in Google Health. Upgrading from 0.2.1
+  replaced the calories-only entries (find → `batchDelete` → create).
+- **Pull burn** (check 5): `calories_burned` written to the food logs from the
+  `total-calories` daily roll-up, other frontmatter untouched (0.2.0).
+- **Status and scheduling bookkeeping**: after a run, Status shows per-day results,
+  "Last completed daily run" and "Processed through" as expected.
 
 ## To verify against the live API
 
-Run the spec's acceptance checks in a test vault:
-
-1. Connect: Status shows all three permissions granted.
-2. Sync a specific date, 2026-09-23: one "Daily intake" entry of 1753 kcal.
-3. Run it again: "unchanged", still one entry.
 4. Change `cal_total`, run again: the old entry is gone and one new entry has the new value.
-5. `FL-2026-09-23.md` gets `calories_burned`; other frontmatter untouched.
-6. A date with no food log: both jobs skipped, nothing created.
-7. Obsidian closed at the sync time: opening it later runs the catch-up once.
-8. Close and reopen on the same day: no second run.
-
-Things most likely to need a tweak: whether create accepts an entry without `serving`, and
-whether the list endpoint needs a `pageSize` for nutrition logs.
+5. A date with no food log: both jobs skipped, nothing created.
+6. Obsidian closed at the sync time: opening it later runs the catch-up once.
+7. Close and reopen on the same day: no second run.
