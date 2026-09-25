@@ -51,6 +51,7 @@ the implementation notes and API details still to verify live.
 
 ## Versioning
 
-`npm version <patch|minor|major>` bumps `package.json`, `manifest.json` and `versions.json`
-together. Tags have no `v` prefix; pushing a tag triggers the release workflow, which
-publishes a GitHub release that BRAT installs from.
+`npm version <patch|minor|major> --no-git-tag-version` bumps `package.json`, `manifest.json`
+and `versions.json` together. Pushing a new version to `main` makes the release workflow
+build and publish a GitHub release (tag without a `v` prefix), which BRAT installs from.
+Tags can't be pushed from Claude Code cloud sessions, so don't rely on pushing tags.

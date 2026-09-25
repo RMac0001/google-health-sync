@@ -147,11 +147,12 @@ when `main.js` changes.
 
 ## Releasing
 
-1. `npm version patch` (or `minor` / `major`). This updates `package.json`,
-   `manifest.json` and `versions.json`, commits, and creates a tag without a `v` prefix.
-2. `git push --follow-tags`
-3. The **Release** workflow builds the plugin and publishes a GitHub release with
-   `main.js`, `manifest.json` and `styles.css`. BRAT picks it up from there.
+1. `npm version patch --no-git-tag-version` (or `minor` / `major`). This updates
+   `package.json`, `manifest.json` and `versions.json` together.
+2. Commit and push to `main`.
+3. The **Release** workflow sees a version with no release yet, builds the plugin and
+   publishes a GitHub release (creating the tag) with `main.js`, `manifest.json` and
+   `styles.css`. BRAT picks it up from there. Pushes that don't change the version do nothing.
 
 ## License
 
