@@ -35,7 +35,7 @@ describe("pushIntake", () => {
 
 		const list = google.apiRequests().find((r) => r.method === "GET");
 		expect(new URL(list?.url ?? "").searchParams.get("filter")).toBe(
-			'nutrition_log.interval.start_time >= "2026-09-23T03:00:00Z" AND nutrition_log.interval.start_time < "2026-09-24T03:00:00Z"',
+			'nutrition_log.interval.civil_start_time >= "2026-09-23" AND nutrition_log.interval.civil_start_time < "2026-09-24"',
 		);
 	});
 

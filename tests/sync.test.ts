@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ALL_SCOPES, SCOPES } from "../src/google/auth";
 import { RETRY_DELAY_MS, isSyncDue } from "../src/scheduler";
-import { hasErrors, runSync, summarize } from "../src/sync";
+import { firstError, hasErrors, runSync, summarize } from "../src/sync";
 import { FakeGoogle, MemoryStore, settings } from "./helpers";
 
 const DATES = ["2026-09-21", "2026-09-22", "2026-09-23"];
@@ -76,6 +76,8 @@ describe("runSync", () => {
 		expect(report.days[0]?.intake.status).toBe("error");
 		expect(report.days[0]?.burn).toEqual({ status: "wrote", kcal: 2500 });
 		expect(hasErrors(report)).toBe(true);
+		expect(firstError(report)).toContain("2026-09-23 intake:");
+		expect(firstError(report)).toContain("forbidden");
 	});
 
 	it("stops the run on a rate limit", async () => {

@@ -74,15 +74,14 @@ export async function pushIntake(
 	}
 }
 
-/** Entries on `date` (local midnight to midnight) whose name matches the entry name. */
+/** Entries on local day `date` whose name matches the entry name. */
 async function findEntries(
 	date: string,
 	client: GoogleHealthClient,
 	entryName: string,
 ): Promise<DataPoint[]> {
-	const start = toUtcTimestamp(localDateTime(date, 0));
-	const end = toUtcTimestamp(localDateTime(addDays(date, 1), 0));
-	const filter = `nutrition_log.interval.start_time >= "${start}" AND nutrition_log.interval.start_time < "${end}"`;
+	// Nutrition logs are a session type, which Google only lets you filter by civil (local) time.
+	const filter = `nutrition_log.interval.civil_start_time >= "${date}" AND nutrition_log.interval.civil_start_time < "${addDays(date, 1)}"`;
 	const points = await client.listDataPoints(NUTRITION_LOG, filter);
 	return points.filter((point) => nutritionLog(point)?.foodDisplayName === entryName);
 }

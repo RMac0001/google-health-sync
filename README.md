@@ -36,6 +36,21 @@ food-log edits and late watch syncs are picked up.
    for months. An unverified app is capped at 100 users, which doesn't matter here. Expect an
    "unverified app" warning once when you sign in; click through it.
 
+## Installing
+
+Install with [BRAT](https://github.com/TfTHacker/obsidian42-brat), which installs the plugin
+from this repo's GitHub releases and keeps it updated:
+
+1. In Obsidian, **Settings → Community plugins → Browse**, search for **BRAT**, install and
+   enable it.
+2. Run the command **BRAT: Add a beta plugin for testing** (or use BRAT's settings →
+   **Add beta plugin**) and enter `RMac0001/google-health-sync`.
+3. Enable **Google Health Sync** under **Settings → Community plugins**.
+
+BRAT checks for new releases when Obsidian starts; run **BRAT: Check for updates to all beta
+plugins** to update immediately. If the repo is private, BRAT also needs a GitHub personal
+access token with read access to it (BRAT settings → **Personal access token**).
+
 ## Connecting
 
 1. In **Settings → Google Health Sync**, enter the Client ID and Client Secret.
@@ -135,8 +150,8 @@ when `main.js` changes.
 1. `npm version patch` (or `minor` / `major`). This updates `package.json`,
    `manifest.json` and `versions.json`, commits, and creates a tag without a `v` prefix.
 2. `git push --follow-tags`
-3. The **Release** workflow builds the plugin and creates a draft GitHub release with
-   `main.js`, `manifest.json` and `styles.css`. Review it and publish.
+3. The **Release** workflow builds the plugin and publishes a GitHub release with
+   `main.js`, `manifest.json` and `styles.css`. BRAT picks it up from there.
 
 ## License
 

@@ -20,7 +20,7 @@ import {
 	type GoogleHealthSyncSettings,
 	type SyncState,
 } from "./settings";
-import { LOG_PREFIX, hasErrors, runSync, summarize, type RunReport } from "./sync";
+import { LOG_PREFIX, firstError, hasErrors, runSync, summarize, type RunReport } from "./sync";
 
 interface PluginData {
 	settings?: Partial<GoogleHealthSyncSettings>;
@@ -29,6 +29,8 @@ interface PluginData {
 }
 
 const CHECK_INTERVAL_MS = 60_000;
+/** Notice duration that keeps it on screen until clicked. */
+const STICKY = 0;
 
 export default class GoogleHealthSyncPlugin extends Plugin {
 	settings: GoogleHealthSyncSettings = { ...DEFAULT_SETTINGS };
@@ -130,7 +132,7 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 					: `Google Health Sync: connected, but ${missing.length} permission(s) were not granted. See settings.`,
 			);
 		} catch (error) {
-			new Notice(`Google Health Sync: connection failed. ${errorMessage(error)}`);
+			new Notice(`Google Health Sync: connection failed. ${errorMessage(error)}`, STICKY);
 		}
 		this.settingTab.refresh();
 	}
@@ -214,8 +216,15 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 			this.state.reconnectNeeded = true;
 			new Notice(
 				"Google Health Sync: reconnect needed. Open the plugin settings to reconnect.",
+				STICKY,
 			);
-		} else if (manual || hasErrors(report)) {
+		} else if (hasErrors(report)) {
+			const detail = firstError(report);
+			new Notice(
+				`Google Health Sync: ${summarize(report)}${detail ? `\n${detail}` : ""}\nDetails are under Status in the plugin settings.`,
+				STICKY,
+			);
+		} else if (manual) {
 			new Notice(`Google Health Sync: ${summarize(report)}`);
 		}
 		if (hasErrors(report)) console.warn(`${LOG_PREFIX} ${summarize(report)}`);

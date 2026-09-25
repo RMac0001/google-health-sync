@@ -1,7 +1,7 @@
 name: Release
 
 # Push a tag matching the manifest version (e.g. "0.1.0", no "v" prefix)
-# to build the plugin and create a draft GitHub release.
+# to build the plugin and publish a GitHub release. BRAT installs from published releases.
 on:
     push:
         tags:
@@ -29,11 +29,11 @@ jobs:
                     echo "Tag $GITHUB_REF_NAME does not match manifest.json version $manifest_version"
                     exit 1
                   fi
-            - name: Create draft release
+            - name: Create release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   gh release create "$GITHUB_REF_NAME" \
                     --title "$GITHUB_REF_NAME" \
-                    --draft \
+                    --generate-notes \
                     main.js manifest.json styles.css

@@ -10,8 +10,12 @@ The Google Health developer docs weren't reachable from the build environment, s
 shapes were checked against the type definitions in Google's generated client,
 `@googleapis/health` v6 (`build/v4.d.ts`):
 
-- List filter field: `nutrition_log.interval.start_time`, operators `>=` / `<`, RFC 3339,
-  joined with `AND`. Results are paginated with `nextPageToken`.
+- List filter: nutrition logs are a **session** data type (their interval is a
+  `SessionTimeInterval`), and session types only support civil-time filters:
+  `nutrition_log.interval.civil_start_time >= "YYYY-MM-DD" AND … < "YYYY-MM-DD"`.
+  (`nutrition_log.interval.start_time` is rejected with
+  `INVALID_DATA_POINT_FILTER_DATA_TYPE_MEMBER`, confirmed live in 0.2.0.) Results are
+  paginated with `nextPageToken`.
 - `dataPoints.create` and `dataPoints:batchDelete` return an `Operation`
   (`done`, `error`, `response`).
 - `dataPoints:dailyRollUp` takes `range` as a closed-open `CivilTimeInterval`
@@ -58,6 +62,11 @@ shapes were checked against the type definitions in Google's generated client,
   entries not being editable.
 - "Sync a specific date" shows its results under Status, but doesn't change `lastRunDate` or
   `lastProcessedDate`.
+
+## Verified live
+
+- OAuth connect with all three scopes (0.2.0).
+- Burn pull: `total-calories` daily roll-up and writing `calories_burned` (0.2.0).
 
 ## To verify against the live API
 

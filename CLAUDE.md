@@ -52,4 +52,5 @@ the implementation notes and API details still to verify live.
 ## Versioning
 
 `npm version <patch|minor|major>` bumps `package.json`, `manifest.json` and `versions.json`
-together. Tags have no `v` prefix; pushing a tag triggers the draft-release workflow.
+together. Tags have no `v` prefix; pushing a tag triggers the release workflow, which
+publishes a GitHub release that BRAT installs from.

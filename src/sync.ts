@@ -90,6 +90,15 @@ export function hasErrors(report: RunReport): boolean {
 	);
 }
 
+/** The first error in a run, as "date job: message", for surfacing in a notice. */
+export function firstError(report: RunReport): string | undefined {
+	for (const day of report.days) {
+		if (day.intake.status === "error") return `${day.date} intake: ${day.intake.message}`;
+		if (day.burn.status === "error") return `${day.date} burn: ${day.burn.message}`;
+	}
+	return undefined;
+}
+
 /** One-line summary, e.g. "3 days: pushed 1, unchanged 2 · burn wrote 3". */
 export function summarize(report: RunReport): string {
 	const count = report.days.length;

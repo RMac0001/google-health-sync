@@ -1,3 +1,4 @@
+import { formatLocalDate } from "../src/dates";
 import { GoogleAuth, type CredentialStore } from "../src/google/auth";
 import { API_BASE, GoogleHealthClient, type CivilDate } from "../src/google/client";
 import type { HttpClient, HttpRequest, HttpResponse } from "../src/google/http";
@@ -103,13 +104,13 @@ export class FakeGoogle {
 		if (request.method === "GET" && path === "nutrition-log/dataPoints") {
 			const filter = url.searchParams.get("filter") ?? "";
 			const [, from, to] =
-				/start_time >= "(.+?)" AND .*start_time < "(.+?)"/.exec(filter) ?? [];
+				/civil_start_time >= "(.+?)" AND .*civil_start_time < "(.+?)"/.exec(filter) ?? [];
 			const points = this.entries.filter(
 				(e) =>
 					from &&
 					to &&
-					e.nutritionLog.interval.startTime >= from &&
-					e.nutritionLog.interval.startTime < to,
+					civilDate(e.nutritionLog.interval.startTime) >= from &&
+					civilDate(e.nutritionLog.interval.startTime) < to,
 			);
 			return ok({ dataPoints: structuredClone(points) });
 		}
@@ -154,6 +155,11 @@ export class FakeGoogle {
 		}
 		return { status: 404, json: { error: { message: `no route ${request.method} ${path}` } } };
 	}
+}
+
+/** Local calendar date of a UTC timestamp, as Google computes `civil_start_time`. */
+function civilDate(utc: string): string {
+	return formatLocalDate(new Date(utc));
 }
 
 export function ok(json: unknown): HttpResponse {
