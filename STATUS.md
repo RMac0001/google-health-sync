@@ -84,7 +84,8 @@ Checked against Roger's Google account on Sep 25, 2026:
 
 ## To verify against the live API
 
-4. Change `cal_total`, run again: the old entry is gone and one new entry has the new value.
-5. A date with no food log: both jobs skipped, nothing created.
-6. Obsidian closed at the sync time: opening it later runs the catch-up once.
-7. Close and reopen on the same day: no second run.
+- **Check 4:** change `cal_total`, run again: the old entry is gone and one new entry has
+  the new value.
+- **Check 6:** a date with no food log: both jobs skipped, nothing created.
+- **Check 7:** Obsidian closed at the sync time: opening it later runs the catch-up once.
+- **Check 8:** close and reopen on the same day: no second run.
