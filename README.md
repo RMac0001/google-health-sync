@@ -86,6 +86,8 @@ Every change is saved immediately; a short "settings saved" notice confirms it.
   Shows a summary such as `3 days: pushed 1, unchanged 2 · burn wrote 3`.
 - **Sync a specific date:** asks for a `YYYY-MM-DD` date and runs both jobs for that day only.
   Doesn't affect the daily schedule.
+- **Show Google Health entries for a date:** lists the food entries Google Health returns for
+  one day (for troubleshooting), with a button to copy them.
 
 ## Scheduling
 

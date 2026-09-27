@@ -115,10 +115,11 @@ describe("pushIntake", () => {
 	it("names the entry and creates nothing when a delete keeps failing", async () => {
 		const google = new FakeGoogle();
 		google.addEntry("Daily intake", 1814, NOON_UTC, "8a1b2c3d");
+		// Live, the rejection wasn't a plain 400, so any status must trigger the fallback.
 		google.overrides.push((request) =>
 			request.url.endsWith(":batchDelete")
 				? {
-						status: 400,
+						status: 404,
 						json: { error: { message: "Invalid argument in request: names" } },
 					}
 				: undefined,
@@ -128,11 +129,15 @@ describe("pushIntake", () => {
 		const result = await pushIntake(DAY, store, google.client(), settings);
 
 		expect(result.status).toBe("error");
-		expect(result.status === "error" && result.message).toContain(
-			"(entry users/8a1b2c3d/dataTypes/nutrition-log/dataPoints/e1)",
+		const message = result.status === "error" ? result.message : "";
+		expect(message).toContain("(HTTP 404)");
+		expect(message).toContain(
+			"tried users/8a1b2c3d/dataTypes/nutrition-log/dataPoints/e1, users/me/dataTypes/nutrition-log/dataPoints/e1",
 		);
 		expect(google.entries).toHaveLength(1);
 		expect(google.entries[0]?.nutritionLog.energy.kcal).toBe(1814);
+		const deletes = google.apiRequests().filter((r) => r.url.endsWith(":batchDelete"));
+		expect(deletes).toHaveLength(2);
 	});
 
 	it("skips without calling Google when there is no food log", async () => {

@@ -57,7 +57,10 @@ shapes were checked against the type definitions in Google's generated client,
   0.2.3 deletes entries one at a time. If Google rejects the name as returned by list
   (`users/{health user id}/…`), it retries with the `users/me/…` form, and a failure now
   includes the entry name. How the second entry was created is not yet known (single device);
-  a lagging list right after a create is the leading guess.
+  a lagging list right after a create is the leading guess. 0.2.3's fallback didn't run
+  because the rejection wasn't HTTP 400; 0.2.4 falls back on any rejection, puts the HTTP
+  status and tried names in the error, and adds a **Show Google Health entries for a date**
+  command to see exactly what Google returns.
 
 ## Behaviour notes
 

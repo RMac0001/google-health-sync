@@ -131,7 +131,7 @@ export class GoogleHealthClient {
 		}
 		if (response.status >= 200 && response.status < 300) return (response.json ?? {}) as T;
 
-		const message = `${method} ${path}: ${googleErrorMessage(response)}`;
+		const message = `${method} ${path} (HTTP ${response.status}): ${googleErrorMessage(response)}`;
 		if (response.status === 429 || response.status >= 500) throw new TransientError(message);
 		throw new ApiError(response.status, message);
 	}

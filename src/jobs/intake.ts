@@ -76,15 +76,20 @@ export async function pushIntake(
 	}
 }
 
+/** Every nutrition log entry on local day `date`, as Google returns it. */
+export function listDayEntries(date: string, client: GoogleHealthClient): Promise<DataPoint[]> {
+	// Nutrition logs are a session type, which Google only lets you filter by civil (local) time.
+	const filter = `nutrition_log.interval.civil_start_time >= "${date}" AND nutrition_log.interval.civil_start_time < "${addDays(date, 1)}"`;
+	return client.listDataPoints(NUTRITION_LOG, filter);
+}
+
 /** Entries on local day `date` whose name matches the entry name. */
 async function findEntries(
 	date: string,
 	client: GoogleHealthClient,
 	entryName: string,
 ): Promise<DataPoint[]> {
-	// Nutrition logs are a session type, which Google only lets you filter by civil (local) time.
-	const filter = `nutrition_log.interval.civil_start_time >= "${date}" AND nutrition_log.interval.civil_start_time < "${addDays(date, 1)}"`;
-	const points = await client.listDataPoints(NUTRITION_LOG, filter);
+	const points = await listDayEntries(date, client);
 	return points.filter((point) => nutritionLog(point)?.foodDisplayName === entryName);
 }
 
@@ -137,12 +142,12 @@ async function deleteEntry(client: GoogleHealthClient, name: string): Promise<vo
 			);
 			return;
 		} catch (error) {
-			if (!(error instanceof ApiError) || error.status !== 400) throw error;
+			if (!(error instanceof ApiError)) throw error;
 			lastError = error;
 		}
 	}
-	const message = lastError instanceof ApiError ? lastError.message : "unknown error";
-	throw new ApiError(400, `${message} (entry ${name})`);
+	const failed = lastError as ApiError;
+	throw new ApiError(failed.status, `${failed.message} (tried ${candidates.join(", ")})`);
 }
 
 async function createEntry(client: GoogleHealthClient, entry: DataPoint): Promise<void> {

@@ -10,3 +10,11 @@
 .google-health-sync-prompt-input {
 	width: 100%;
 }
+
+.google-health-sync-view {
+	max-height: 60vh;
+	overflow: auto;
+	font-size: var(--font-ui-smaller);
+	user-select: text;
+	white-space: pre-wrap;
+}

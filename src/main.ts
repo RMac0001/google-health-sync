@@ -11,7 +11,8 @@ import { GoogleAuth, buildAuthUrl, extractAuthCode, missingScopes } from "./goog
 import { GoogleHealthClient } from "./google/client";
 import { errorMessage, type HttpClient } from "./google/http";
 import type { FoodLogStore } from "./jobs/types";
-import { TextPromptModal } from "./modals";
+import { TextPromptModal, TextViewModal } from "./modals";
+import { listDayEntries } from "./jobs/intake";
 import { isSyncDue } from "./scheduler";
 import {
 	DEFAULT_SETTINGS,
@@ -72,6 +73,11 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 			id: "sync-date",
 			name: "Sync a specific date",
 			callback: () => this.promptSyncDate(),
+		});
+		this.addCommand({
+			id: "show-entries",
+			name: "Show Google Health entries for a date",
+			callback: () => this.promptShowEntries(),
 		});
 
 		this.app.workspace.onLayoutReady(() => {
@@ -182,6 +188,32 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 				const date = formatLocalDate(parseLocalDate(value) as Date);
 				const report = await this.run([date], true);
 				if (report) await this.finishRun(report, true);
+			},
+		}).open();
+	}
+
+	/** Diagnostics: shows the raw nutrition log entries Google returns for one day. */
+	private promptShowEntries(): void {
+		if (!this.isConnected()) {
+			new Notice("Google Health Sync: connect your Google account in settings first.");
+			return;
+		}
+		new TextPromptModal(this.app, {
+			title: "Show Google Health entries",
+			description: "Lists the food entries Google Health returns for one day.",
+			placeholder: "YYYY-MM-DD",
+			submitText: "Show",
+			validate: (value) =>
+				parseLocalDate(value) ? undefined : "Enter a date as YYYY-MM-DD.",
+			onSubmit: async (value) => {
+				const date = formatLocalDate(parseLocalDate(value) as Date);
+				try {
+					const points = await listDayEntries(date, this.client);
+					const text = `${points.length} entries on ${date}\n\n${JSON.stringify(points, null, 2)}`;
+					new TextViewModal(this.app, `Google Health entries: ${date}`, text).open();
+				} catch (error) {
+					new Notice(`Google Health Sync: ${errorMessage(error)}`, STICKY);
+				}
 			},
 		}).open();
 	}

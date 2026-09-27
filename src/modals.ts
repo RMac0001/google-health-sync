@@ -57,3 +57,32 @@ export class TextPromptModal extends Modal {
 		this.contentEl.empty();
 	}
 }
+
+/** Read-only text (e.g. diagnostics) with a button to copy it to the clipboard. */
+export class TextViewModal extends Modal {
+	constructor(
+		app: App,
+		private readonly title: string,
+		private readonly text: string,
+	) {
+		super(app);
+	}
+
+	onOpen(): void {
+		this.setTitle(this.title);
+		new Setting(this.contentEl).addButton((button) =>
+			button
+				.setButtonText("Copy")
+				.setCta()
+				.onClick(async () => {
+					await navigator.clipboard.writeText(this.text);
+					button.setButtonText("Copied");
+				}),
+		);
+		this.contentEl.createEl("pre", { cls: "google-health-sync-view", text: this.text });
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
+	}
+}
