@@ -78,13 +78,61 @@ describe("pushIntake", () => {
 		const names = google.entries.map((e) => e.nutritionLog.foodDisplayName).sort();
 		expect(names).toEqual(["Banana", "Daily intake"]);
 		expect(google.entries).toContainEqual(banana);
-		const deleteRequest = google.apiRequests().find((r) => r.url.endsWith(":batchDelete"));
-		expect(JSON.parse(deleteRequest?.body ?? "{}")).toEqual({
-			names: [
-				"users/me/dataTypes/nutrition-log/dataPoints/e1",
-				"users/me/dataTypes/nutrition-log/dataPoints/e2",
-			],
+		const deletes = google
+			.apiRequests()
+			.filter((r) => r.url.endsWith(":batchDelete"))
+			.map((r) => JSON.parse(r.body ?? "{}") as unknown);
+		expect(deletes).toEqual([
+			{ names: ["users/me/dataTypes/nutrition-log/dataPoints/e1"] },
+			{ names: ["users/me/dataTypes/nutrition-log/dataPoints/e2"] },
+		]);
+	});
+
+	it("retries a rejected delete with the users/me form of the name", async () => {
+		const google = new FakeGoogle();
+		google.addEntry("Daily intake", 1814, NOON_UTC, "8a1b2c3d");
+		google.addEntry("Daily intake", 1814, NOON_UTC, "8a1b2c3d");
+		// Google rejecting names that carry the real user id, as seen live in 0.2.2.
+		google.overrides.push((request) => {
+			if (!request.url.endsWith(":batchDelete")) return undefined;
+			const { names } = JSON.parse(request.body ?? "{}") as { names: string[] };
+			return names.every((n) => n.startsWith("users/me/"))
+				? undefined
+				: {
+						status: 400,
+						json: { error: { message: "Invalid argument in request: names" } },
+					};
 		});
+		const store = new MemoryStore().add(DAY, { cal_total: 1814 });
+
+		expect(await pushIntake(DAY, store, google.client(), settings)).toEqual({
+			status: "pushed",
+			kcal: 1814,
+		});
+		expect(google.entries).toHaveLength(1);
+	});
+
+	it("names the entry and creates nothing when a delete keeps failing", async () => {
+		const google = new FakeGoogle();
+		google.addEntry("Daily intake", 1814, NOON_UTC, "8a1b2c3d");
+		google.overrides.push((request) =>
+			request.url.endsWith(":batchDelete")
+				? {
+						status: 400,
+						json: { error: { message: "Invalid argument in request: names" } },
+					}
+				: undefined,
+		);
+		const store = new MemoryStore().add(DAY, { cal_total: 1900 });
+
+		const result = await pushIntake(DAY, store, google.client(), settings);
+
+		expect(result.status).toBe("error");
+		expect(result.status === "error" && result.message).toContain(
+			"(entry users/8a1b2c3d/dataTypes/nutrition-log/dataPoints/e1)",
+		);
+		expect(google.entries).toHaveLength(1);
+		expect(google.entries[0]?.nutritionLog.energy.kcal).toBe(1814);
 	});
 
 	it("skips without calling Google when there is no food log", async () => {

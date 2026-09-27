@@ -63,10 +63,10 @@ export async function pushIntake(
 		if (onlyEntry && entryMatches(onlyEntry, kcal, macros))
 			return { status: "unchanged", kcal };
 
-		const names = existing.map((point) => point.name).filter((name): name is string => !!name);
-		if (names.length > 0) {
-			checkOperation(await client.batchDeleteDataPoints(NUTRITION_LOG, names), "delete");
-		}
+		const names = new Set(
+			existing.map((point) => point.name).filter((name): name is string => !!name),
+		);
+		for (const name of names) await deleteEntry(client, name);
 
 		await createEntry(client, buildEntry(date, kcal, settings.entryName, macros));
 		return { status: "pushed", kcal };
@@ -116,6 +116,33 @@ export function buildEntry(
 		log.nutrients = [{ nutrient: PROTEIN, quantity: { grams: macros.protein } }];
 	}
 	return { nutritionLog: log };
+}
+
+/**
+ * Deletes one entry. If Google rejects the name as returned by list (which carries the
+ * system-generated user id), retries with the same point addressed under `users/me`, like
+ * every other request. A failure names the entry so it can be diagnosed.
+ */
+async function deleteEntry(client: GoogleHealthClient, name: string): Promise<void> {
+	const candidates = [name];
+	const asMe = name.replace(/^users\/[^/]+\//, "users/me/");
+	if (asMe !== name) candidates.push(asMe);
+
+	let lastError: unknown;
+	for (const candidate of candidates) {
+		try {
+			checkOperation(
+				await client.batchDeleteDataPoints(NUTRITION_LOG, [candidate]),
+				"delete",
+			);
+			return;
+		} catch (error) {
+			if (!(error instanceof ApiError) || error.status !== 400) throw error;
+			lastError = error;
+		}
+	}
+	const message = lastError instanceof ApiError ? lastError.message : "unknown error";
+	throw new ApiError(400, `${message} (entry ${name})`);
 }
 
 async function createEntry(client: GoogleHealthClient, entry: DataPoint): Promise<void> {

@@ -42,6 +42,8 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 	private client!: GoogleHealthClient;
 	private settingTab!: GoogleHealthSyncSettingTab;
 	private running = false;
+	private errorNotice: Notice | null = null;
+	private lastErrorMessage: string | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadPluginData();
@@ -220,16 +222,34 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 			);
 		} else if (hasErrors(report)) {
 			const detail = firstError(report);
-			new Notice(
+			this.showError(
 				`Google Health Sync: ${summarize(report)}${detail ? `\n${detail}` : ""}\nDetails are under Status in the plugin settings.`,
-				STICKY,
+				manual,
 			);
-		} else if (manual) {
-			new Notice(`Google Health Sync: ${summarize(report)}`);
+		} else {
+			this.clearError();
+			if (manual) new Notice(`Google Health Sync: ${summarize(report)}`);
 		}
 		if (hasErrors(report)) console.warn(`${LOG_PREFIX} ${summarize(report)}`);
 		await this.savePluginData();
 		this.settingTab.refresh();
+	}
+
+	/**
+	 * Shows an error until clicked, replacing any previous one. Scheduled retries (every 15
+	 * minutes) that hit the same error stay quiet instead of stacking identical notices.
+	 */
+	private showError(message: string, manual: boolean): void {
+		if (!manual && message === this.lastErrorMessage) return;
+		this.errorNotice?.hide();
+		this.errorNotice = new Notice(message, STICKY);
+		this.lastErrorMessage = message;
+	}
+
+	private clearError(): void {
+		this.errorNotice?.hide();
+		this.errorNotice = null;
+		this.lastErrorMessage = null;
 	}
 
 	private foodLogStore(): FoodLogStore {

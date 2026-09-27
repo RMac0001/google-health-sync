@@ -49,6 +49,16 @@ shapes were checked against the type definitions in Google's generated client,
 - **Log level:** per-day results go to `console.debug` (Obsidian's plugin guidelines, enforced
   by the linter, disallow `console.log`). Enable "Verbose" in the dev tools console to see them.
 
+## Known issues
+
+- **Duplicate "Daily intake" entries (seen 2026-09-24, v0.2.2).** Google Health showed two
+  identical entries for one day, and every later run failed with
+  `batchDelete: Invalid argument in request: names`, so the duplicates could not be cleaned up.
+  0.2.3 deletes entries one at a time. If Google rejects the name as returned by list
+  (`users/{health user id}/…`), it retries with the `users/me/…` form, and a failure now
+  includes the entry name. How the second entry was created is not yet known (single device);
+  a lagging list right after a create is the leading guess.
+
 ## Behaviour notes
 
 - A run is recorded as complete (`lastRunDate` / `lastProcessedDate` updated) only when

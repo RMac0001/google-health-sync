@@ -76,9 +76,9 @@ export class FakeGoogle {
 		return new GoogleHealthClient(this.http, new GoogleAuth(this.http, credentials()));
 	}
 
-	addEntry(foodDisplayName: string, kcal: number, startTime: string): StoredEntry {
+	addEntry(foodDisplayName: string, kcal: number, startTime: string, user = "me"): StoredEntry {
 		const entry: StoredEntry = {
-			name: `users/me/dataTypes/nutrition-log/dataPoints/e${this.nextId++}`,
+			name: `users/${user}/dataTypes/nutrition-log/dataPoints/e${this.nextId++}`,
 			nutritionLog: {
 				foodDisplayName,
 				energy: { kcal },
@@ -126,7 +126,9 @@ export class FakeGoogle {
 		if (request.method === "POST" && path === "nutrition-log/dataPoints:batchDelete") {
 			const names = body.names as string[];
 			for (const name of names) {
-				const index = this.entries.findIndex((e) => e.name === name);
+				// Match on the point id so `users/me/...` and `users/{id}/...` address the same point.
+				const id = name.split("/").pop();
+				const index = this.entries.findIndex((e) => e.name.split("/").pop() === id);
 				if (index >= 0) this.entries.splice(index, 1);
 			}
 			return ok({ name: "operations/delete", done: true, response: {} });
