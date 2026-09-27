@@ -7,7 +7,7 @@ import {
 	type SettingDefinitionItem,
 } from "obsidian";
 import { MAX_WINDOW_DAYS, parseSyncTime } from "./dates";
-import { SCOPES, missingScopes } from "./google/auth";
+import { DEFAULT_REDIRECT_URI, SCOPES, missingScopes } from "./google/auth";
 import { describeResult } from "./jobs/types";
 import type GoogleHealthSyncPlugin from "./main";
 import type { RunReport } from "./sync";
@@ -26,6 +26,8 @@ export interface GoogleHealthSyncSettings {
 	proteinProperty: string;
 	entryName: string;
 	clientId: string;
+	/** Where Google sends the sign-in code; must be registered on the OAuth client. */
+	redirectUri: string;
 }
 
 /** Per-device toggle, kept in local storage instead of the (vault-synced) plugin data. */
@@ -44,6 +46,7 @@ export const DEFAULT_SETTINGS: GoogleHealthSyncSettings = {
 	proteinProperty: "protein_total",
 	entryName: "Daily intake",
 	clientId: "",
+	redirectUri: DEFAULT_REDIRECT_URI,
 };
 
 /** Run bookkeeping, stored in plugin data next to the settings. */
@@ -199,6 +202,19 @@ export class GoogleHealthSyncSettingTab extends PluginSettingTab {
 						name: "Client ID",
 						desc: "OAuth client ID from Google Cloud.",
 						control: { type: "text", key: "clientId" },
+					},
+					{
+						name: "Redirect URI",
+						desc: "Where Google sends you after sign-in. Must exactly match an authorized redirect URI on your Google client. The default page shows the code with a copy button.",
+						control: {
+							type: "text",
+							key: "redirectUri",
+							placeholder: DEFAULT_REDIRECT_URI,
+							validate: (value) =>
+								/^https:\/\/\S+$/.test(value)
+									? undefined
+									: "Enter an https:// address.",
+						},
 					},
 					{
 						name: "Client secret",

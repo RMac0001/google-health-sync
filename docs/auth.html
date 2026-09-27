@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+		/>
+		<meta name="referrer" content="no-referrer" />
+		<meta name="robots" content="noindex" />
+		<title>Google Health Sync sign-in</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #f7f7f8;
+				--card: #ffffff;
+				--text: #1f2328;
+				--muted: #59636e;
+				--accent: #0b57d0;
+				--error: #b3261e;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #16171a;
+					--card: #202226;
+					--text: #e6e7e9;
+					--muted: #a0a6ad;
+					--accent: #a8c7fa;
+					--error: #f2b8b5;
+				}
+			}
+			body {
+				margin: 0;
+				padding: 24px 16px;
+				background: var(--bg);
+				color: var(--text);
+				font:
+					16px/1.5 system-ui,
+					-apple-system,
+					"Segoe UI",
+					Roboto,
+					sans-serif;
+			}
+			main {
+				max-width: 520px;
+				margin: 0 auto;
+				padding: 24px;
+				background: var(--card);
+				border-radius: 12px;
+			}
+			h1 {
+				margin: 0 0 8px;
+				font-size: 1.3rem;
+			}
+			p {
+				color: var(--muted);
+			}
+			#code {
+				display: block;
+				width: 100%;
+				box-sizing: border-box;
+				margin: 16px 0;
+				padding: 12px;
+				font:
+					15px/1.4 ui-monospace,
+					SFMono-Regular,
+					Menlo,
+					Consolas,
+					monospace;
+				color: var(--text);
+				background: var(--bg);
+				border: 1px solid var(--muted);
+				border-radius: 8px;
+				word-break: break-all;
+				resize: none;
+			}
+			button {
+				width: 100%;
+				padding: 14px;
+				font-size: 1rem;
+				font-weight: 600;
+				color: var(--card);
+				background: var(--accent);
+				border: 0;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+			.error {
+				color: var(--error);
+			}
+			[hidden] {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Google Health Sync</h1>
+			<div id="ok" hidden>
+				<p>
+					Copy this sign-in code, go back to Obsidian and paste it into the Connect
+					prompt.
+				</p>
+				<textarea id="code" rows="4" readonly aria-label="Sign-in code"></textarea>
+				<button id="copy" type="button">Copy code</button>
+				<p>The code works once and expires in about 10 minutes.</p>
+			</div>
+			<p id="failed" class="error" hidden></p>
+			<p id="empty" hidden>
+				No sign-in code here. Start from the <strong>Connect</strong> button in the plugin's
+				settings in Obsidian.
+			</p>
+		</main>
+		<script>
+			// Runs only in your browser: the code is shown here and never sent anywhere.
+			const params = new URLSearchParams(location.search);
+			const code = params.get("code");
+			const error = params.get("error");
+			// Keep the code out of the address bar and browser history.
+			if (code || error) history.replaceState(null, "", location.pathname);
+
+			if (code) {
+				const box = document.getElementById("code");
+				const button = document.getElementById("copy");
+				box.value = code;
+				document.getElementById("ok").hidden = false;
+				button.addEventListener("click", async () => {
+					try {
+						await navigator.clipboard.writeText(code);
+					} catch {
+						box.select();
+						document.execCommand("copy");
+					}
+					button.textContent = "Copied";
+				});
+			} else if (error) {
+				const failed = document.getElementById("failed");
+				failed.textContent =
+					error === "access_denied"
+						? "Access wasn't granted. Go back to Obsidian and try Connect again."
+						: `Google returned an error: ${error}`;
+				failed.hidden = false;
+			} else {
+				document.getElementById("empty").hidden = false;
+			}
+		</script>
+	</body>
+</html>

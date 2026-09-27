@@ -20,7 +20,9 @@ food-log edits and late watch syncs are picked up.
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable
    the **Google Health API**.
 2. Create an **OAuth 2.0 Client ID** of type **Web application**, with authorized redirect
-   URI `https://www.google.com`. Copy the Client ID and Client Secret.
+   URI `https://rmac0001.github.io/google-health-sync/auth.html` (the sign-in page from this
+   repo's GitHub Pages site). Adding `https://www.google.com` as well keeps the old
+   copy-the-address fallback working. Copy the Client ID and Client Secret.
 3. On the **Audience** page, set user type to **External** and add your Google account as a
    test user.
 4. On the **Data Access** page, add these three scopes:
@@ -55,9 +57,10 @@ access token with read access to it (BRAT settings → **Personal access token**
 
 1. In **Settings → Google Health Sync**, enter the Client ID and Client Secret.
 2. Click **Connect**. Your browser opens Google's consent page.
-3. After you allow access, Google sends you to `https://www.google.com/?code=…`. Copy the
-   whole address from the address bar (or just the code) and paste it into the prompt in
-   Obsidian.
+3. After you allow access, Google sends you to the plugin's sign-in page, which shows the
+   code with a **Copy code** button. Copy it, go back to Obsidian and paste it into the
+   prompt. (If **Redirect URI** is set to `https://www.google.com` instead, copy the whole
+   address from the address bar.)
 4. Settings shows **Connected** and whether all three permissions were granted. If one is
    missing, the job that needs it is skipped.
 5. Turn on **Run daily sync on this device** on the one device that should do the daily
@@ -78,6 +81,7 @@ The client secret and refresh token are kept in Obsidian's secret storage, not i
 | Burn property                  | `calories_burned`                                                | Written to the food log.                                                          |
 | Carbs / Fat / Protein property | `carbs_total` / `fat_total` / `protein_total`                    | Grams, sent to Google Health with the calories. Missing or 0 values are left out. |
 | Entry name                     | `Daily intake`                                                   | Name of the Google Health entry; entries with this name are replaced on change.   |
+| Redirect URI                   | `https://rmac0001.github.io/google-health-sync/auth.html`        | Must match a redirect URI on the Google client.                                   |
 | Client ID / secret             | (empty)                                                          | From Google Cloud.                                                                |
 
 Every change is saved immediately; a short "settings saved" notice confirms it.
@@ -109,6 +113,16 @@ sign-in is stored in that device's secret storage.
 
 Per-day results are logged to the developer console (verbose level) with a
 `[Google Health Sync]` prefix, and shown under **Status** in settings.
+
+## Sign-in page (GitHub Pages)
+
+`docs/` is published with GitHub Pages (**Settings → Pages → Deploy from a branch → `main`,
+`/docs`**) at `https://rmac0001.github.io/google-health-sync/`:
+
+- `auth.html`: the OAuth redirect target. It shows the code with a copy button, entirely in
+  the browser, and removes it from the address bar and history.
+- `index.html` and `privacy.html`: home page and privacy policy, for the Google consent
+  screen's Branding page.
 
 ## Development
 

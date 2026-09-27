@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'none'; style-src 'unsafe-inline'"
+		/>
+		<title>Privacy policy</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #f7f7f8;
+				--text: #1f2328;
+				--muted: #59636e;
+				--accent: #0b57d0;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #16171a;
+					--text: #e6e7e9;
+					--muted: #a0a6ad;
+					--accent: #a8c7fa;
+				}
+			}
+			body {
+				margin: 0;
+				padding: 24px 16px;
+				background: var(--bg);
+				color: var(--text);
+				font:
+					16px/1.6 system-ui,
+					-apple-system,
+					"Segoe UI",
+					Roboto,
+					sans-serif;
+			}
+			main {
+				max-width: 680px;
+				margin: 0 auto;
+			}
+			p,
+			li {
+				color: var(--muted);
+			}
+			a {
+				color: var(--accent);
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Privacy policy: Google Health Sync</h1>
+			<p>Last updated: September 27, 2026</p>
+
+			<h2>What the plugin does</h2>
+			<p>
+				Google Health Sync is an Obsidian plugin. It reads daily nutrition totals from notes
+				in your own Obsidian vault and writes them to your Google Health account, and it
+				reads your daily calories burned from Google Health and writes them to those notes.
+			</p>
+
+			<h2>Data it accesses</h2>
+			<ul>
+				<li>
+					From your vault: the calorie, carbohydrate, fat and protein properties of your
+					daily food log notes.
+				</li>
+				<li>
+					From Google Health, with your permission: your nutrition entries (to find and
+					replace the plugin's own "Daily intake" entries) and your daily total calories
+					burned.
+				</li>
+			</ul>
+
+			<h2>Where data goes</h2>
+			<ul>
+				<li>
+					The plugin runs only on your device, inside Obsidian. It sends data directly
+					between your device and Google's APIs. There is no server operated by the
+					plugin, and no data is collected, stored, sold or shared with anyone else.
+				</li>
+				<li>
+					Your Google sign-in (refresh token) and OAuth client secret are stored in
+					Obsidian's secret storage on each device, not in your notes.
+				</li>
+				<li>
+					The <a href="auth.html">sign-in page</a> on this site only displays the one-time
+					sign-in code in your browser so you can copy it. It does not send, store or log
+					the code. Like any website, this site is hosted by GitHub, which may keep
+					standard server logs.
+				</li>
+			</ul>
+
+			<h2>Google user data</h2>
+			<p>
+				Use of information received from Google APIs adheres to the
+				<a href="https://developers.google.com/terms/api-services-user-data-policy"
+					>Google API Services User Data Policy</a
+				>, including the Limited Use requirements. Google Health data is used only to
+				provide the sync described above, is not used for advertising, and is not
+				transferred to anyone.
+			</p>
+
+			<h2>Removing access</h2>
+			<p>
+				Disconnect in the plugin's settings, and revoke access at any time in your Google
+				account under Security → Third-party connections. Entries the plugin created stay in
+				Google Health until you delete them there.
+			</p>
+
+			<h2>Contact</h2>
+			<p>
+				Questions: open an issue at
+				<a href="https://github.com/RMac0001/google-health-sync/issues"
+					>github.com/RMac0001/google-health-sync</a
+				>.
+			</p>
+		</main>
+	</body>
+</html>

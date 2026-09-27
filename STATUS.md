@@ -55,6 +55,15 @@ shapes were checked against the type definitions in Google's generated client,
 moved from plugin data (which syncs with the vault) to per-device local storage, off by
 default, so exactly one device runs the scheduled sync. Not yet verified on a phone.
 
+## Sign-in page (0.3.1)
+
+The OAuth redirect defaults to `docs/auth.html` on GitHub Pages, which shows the code with a
+copy button. On phones, `https://www.google.com?code=…` often opened in the Google app or
+hid the address, so the code couldn't be copied. The redirect URI is a setting, so
+`https://www.google.com` still works as a fallback. PKCE is not implemented yet (deferred).
+`index.html` and `privacy.html` supply the home page and privacy policy links for the consent
+screen's Branding page, which Google requires before publishing to production.
+
 ## Known issues
 
 - **Duplicate "Daily intake" entries (seen 2026-09-24, v0.2.2).** Google Health showed two

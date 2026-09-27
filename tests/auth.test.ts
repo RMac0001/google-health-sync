@@ -3,6 +3,7 @@ import {
 	ALL_SCOPES,
 	GoogleAuth,
 	SCOPES,
+	DEFAULT_REDIRECT_URI,
 	buildAuthUrl,
 	extractAuthCode,
 	missingScopes,
@@ -13,10 +14,12 @@ import { credentials, ok } from "./helpers";
 
 describe("buildAuthUrl", () => {
 	it("requests offline access with all three scopes", () => {
-		const url = new URL(buildAuthUrl("my-client"));
+		const url = new URL(buildAuthUrl("my-client", DEFAULT_REDIRECT_URI));
 		expect(url.origin + url.pathname).toBe("https://accounts.google.com/o/oauth2/v2/auth");
 		expect(url.searchParams.get("client_id")).toBe("my-client");
-		expect(url.searchParams.get("redirect_uri")).toBe("https://www.google.com");
+		expect(url.searchParams.get("redirect_uri")).toBe(
+			"https://rmac0001.github.io/google-health-sync/auth.html",
+		);
 		expect(url.searchParams.get("response_type")).toBe("code");
 		expect(url.searchParams.get("access_type")).toBe("offline");
 		expect(url.searchParams.get("prompt")).toBe("consent");
@@ -80,7 +83,7 @@ describe("GoogleAuth", () => {
 		const body = new URLSearchParams(requests[0]?.body);
 		expect(body.get("grant_type")).toBe("authorization_code");
 		expect(body.get("code")).toBe("4/code");
-		expect(body.get("redirect_uri")).toBe("https://www.google.com");
+		expect(body.get("redirect_uri")).toBe("https://example.com/cb");
 		expect(await auth.getAccessToken()).toBe("a1");
 		expect(requests).toHaveLength(1);
 	});

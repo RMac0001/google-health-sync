@@ -173,6 +173,7 @@ export function credentials(refreshToken = "refresh"): CredentialStore & { token
 		token: refreshToken,
 		clientId: () => "client-id",
 		clientSecret: () => "client-secret",
+		redirectUri: () => "https://example.com/cb",
 		refreshToken: () => store.token,
 		setRefreshToken: (token: string) => {
 			store.token = token;

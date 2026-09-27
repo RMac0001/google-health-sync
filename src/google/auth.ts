@@ -22,16 +22,17 @@ export const JOB_SCOPES = {
 	burn: [SCOPES.activityRead],
 } as const;
 
-export const REDIRECT_URI = "https://www.google.com";
+/** Sign-in page on this repo's GitHub Pages site; it shows the code with a copy button. */
+export const DEFAULT_REDIRECT_URI = "https://rmac0001.github.io/google-health-sync/auth.html";
 const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 /** Refresh when the access token expires within this many milliseconds. */
 const EXPIRY_MARGIN_MS = 60_000;
 
-export function buildAuthUrl(clientId: string): string {
+export function buildAuthUrl(clientId: string, redirectUri: string): string {
 	const params = new URLSearchParams({
 		client_id: clientId,
-		redirect_uri: REDIRECT_URI,
+		redirect_uri: redirectUri,
 		response_type: "code",
 		access_type: "offline",
 		prompt: "consent",
@@ -49,7 +50,7 @@ export function extractAuthCode(input: string): string | null {
 	if (!trimmed) return null;
 	if (/^https?:\/\//i.test(trimmed) || trimmed.includes("code=")) {
 		try {
-			const url = new URL(trimmed, REDIRECT_URI);
+			const url = new URL(trimmed, "https://example.invalid/");
 			return url.searchParams.get("code") || null;
 		} catch {
 			return null;
@@ -77,6 +78,8 @@ export function hasScopes(granted: readonly string[], required: readonly string[
 /** Where credentials live. Backed by Obsidian secret storage in the plugin. */
 export interface CredentialStore {
 	clientId(): string;
+	/** Must exactly match a redirect URI registered on the OAuth client. */
+	redirectUri(): string;
 	clientSecret(): string;
 	refreshToken(): string;
 	setRefreshToken(token: string): void;
@@ -109,7 +112,7 @@ export class GoogleAuth {
 			code,
 			client_id: this.credentials.clientId(),
 			client_secret: this.credentials.clientSecret(),
-			redirect_uri: REDIRECT_URI,
+			redirect_uri: this.credentials.redirectUri(),
 			grant_type: "authorization_code",
 		});
 		if (response.status !== 200) {

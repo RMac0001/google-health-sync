@@ -114,12 +114,12 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 			new Notice("Google Health Sync: enter the client ID and client secret first.");
 			return;
 		}
-		window.open(buildAuthUrl(this.settings.clientId));
+		window.open(buildAuthUrl(this.settings.clientId, this.settings.redirectUri));
 		new TextPromptModal(this.app, {
 			title: "Connect Google Health",
 			description:
-				"After you allow access, Google opens www.google.com. Copy the full address from the address bar (on a phone, tap the address bar, select all and copy), then come back and paste it here.",
-			placeholder: "https://www.google.com/?code=…",
+				"Sign in and allow access in the browser. The page you land on shows a sign-in code: copy it, come back and paste it here. (If you land on another page, paste its full address instead.)",
+			placeholder: "Sign-in code or address",
 			submitText: "Connect",
 			validate: (value) =>
 				extractAuthCode(value) ? undefined : "No code found in what you pasted.",

@@ -27,6 +27,10 @@ export class Credentials implements CredentialStore {
 		return this.settings().clientId;
 	}
 
+	redirectUri(): string {
+		return this.settings().redirectUri;
+	}
+
 	clientSecret(): string {
 		return this.get(CLIENT_SECRET_ID, "clientSecret");
 	}

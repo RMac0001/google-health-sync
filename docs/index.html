@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'none'; style-src 'unsafe-inline'"
+		/>
+		<title>Google Health Sync</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #f7f7f8;
+				--text: #1f2328;
+				--muted: #59636e;
+				--accent: #0b57d0;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #16171a;
+					--text: #e6e7e9;
+					--muted: #a0a6ad;
+					--accent: #a8c7fa;
+				}
+			}
+			body {
+				margin: 0;
+				padding: 24px 16px;
+				background: var(--bg);
+				color: var(--text);
+				font:
+					16px/1.6 system-ui,
+					-apple-system,
+					"Segoe UI",
+					Roboto,
+					sans-serif;
+			}
+			main {
+				max-width: 640px;
+				margin: 0 auto;
+			}
+			p,
+			li {
+				color: var(--muted);
+			}
+			a {
+				color: var(--accent);
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Google Health Sync</h1>
+			<p>
+				An <a href="https://obsidian.md">Obsidian</a> plugin that puts daily calories eaten
+				and daily calories burned side by side, in both Google Health and your Obsidian
+				vault.
+			</p>
+			<ul>
+				<li>
+					Sends each day's calories, carbs, fat and protein from your food log note to
+					Google Health as one "Daily intake" entry.
+				</li>
+				<li>Writes Google Health's total calories burned back into the same note.</li>
+			</ul>
+			<p>
+				It runs entirely inside Obsidian on your own device and talks directly to Google.
+				There is no server in between.
+			</p>
+			<ul>
+				<li>
+					<a href="https://github.com/RMac0001/google-health-sync"
+						>Source code and setup</a
+					>
+				</li>
+				<li><a href="privacy.html">Privacy policy</a></li>
+			</ul>
+		</main>
+	</body>
+</html>
