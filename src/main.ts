@@ -32,6 +32,7 @@ interface PluginData {
 const CHECK_INTERVAL_MS = 60_000;
 /** Notice duration that keeps it on screen until clicked. */
 const STICKY = 0;
+const DAILY_SYNC_KEY = "google-health-sync-daily-sync";
 
 export default class GoogleHealthSyncPlugin extends Plugin {
 	settings: GoogleHealthSyncSettings = { ...DEFAULT_SETTINGS };
@@ -89,6 +90,15 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 		});
 	}
 
+	/** Whether the scheduled daily sync runs on this device (local storage, not vault-synced). */
+	isDailySyncOnThisDevice(): boolean {
+		return this.app.loadLocalStorage(DAILY_SYNC_KEY) === true;
+	}
+
+	setDailySyncOnThisDevice(on: boolean): void {
+		this.app.saveLocalStorage(DAILY_SYNC_KEY, on ? true : null);
+	}
+
 	/** Has a refresh token and hasn't hit an auth failure since connecting. */
 	isConnected(): boolean {
 		return this.credentials.refreshToken() !== "" && !this.state.reconnectNeeded;
@@ -108,7 +118,7 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 		new TextPromptModal(this.app, {
 			title: "Connect Google Health",
 			description:
-				"After you allow access, Google opens www.google.com. Copy the full address from the address bar (or just the code) and paste it here.",
+				"After you allow access, Google opens www.google.com. Copy the full address from the address bar (on a phone, tap the address bar, select all and copy), then come back and paste it here.",
 			placeholder: "https://www.google.com/?code=…",
 			submitText: "Connect",
 			validate: (value) =>
@@ -147,7 +157,7 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 
 	private async checkSchedule(): Promise<void> {
 		const due = isSyncDue(new Date(), {
-			enabled: this.settings.enabled,
+			enabled: this.isDailySyncOnThisDevice(),
 			connected: this.isConnected(),
 			running: this.running,
 			syncTime: this.settings.syncTime,
@@ -308,7 +318,11 @@ export default class GoogleHealthSyncPlugin extends Plugin {
 
 	private async loadPluginData(): Promise<void> {
 		const data = ((await this.loadData()) as PluginData | null) ?? {};
-		this.settings = { ...DEFAULT_SETTINGS, ...data.settings };
+		// `enabled` moved to per-device local storage in 0.3.0; drop the old synced value.
+		const { enabled: _legacyEnabled, ...saved } = (data.settings ?? {}) as Partial<
+			GoogleHealthSyncSettings & { enabled: boolean }
+		>;
+		this.settings = { ...DEFAULT_SETTINGS, ...saved };
 		this.state = { ...DEFAULT_STATE, ...data.state };
 		Object.assign(this.secrets, data.secrets);
 	}

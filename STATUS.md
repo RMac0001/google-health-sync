@@ -49,6 +49,12 @@ shapes were checked against the type definitions in Google's generated client,
 - **Log level:** per-day results go to `console.debug` (Obsidian's plugin guidelines, enforced
   by the linter, disallow `console.log`). Enable "Verbose" in the dev tools console to see them.
 
+## Mobile (0.3.0)
+
+`isDesktopOnly` is now false; the bundle uses no Node or Electron APIs. The daily-sync switch
+moved from plugin data (which syncs with the vault) to per-device local storage, off by
+default, so exactly one device runs the scheduled sync. Not yet verified on a phone.
+
 ## Known issues
 
 - **Duplicate "Daily intake" entries (seen 2026-09-24, v0.2.2).** Google Health showed two

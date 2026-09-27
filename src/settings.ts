@@ -13,7 +13,6 @@ import type GoogleHealthSyncPlugin from "./main";
 import type { RunReport } from "./sync";
 
 export interface GoogleHealthSyncSettings {
-	enabled: boolean;
 	/** Local 24h `HH:MM`. */
 	syncTime: string;
 	lookBackDays: number;
@@ -29,10 +28,12 @@ export interface GoogleHealthSyncSettings {
 	clientId: string;
 }
 
-type SettingKey = keyof GoogleHealthSyncSettings;
+/** Per-device toggle, kept in local storage instead of the (vault-synced) plugin data. */
+const SYNC_ON_THIS_DEVICE = "syncOnThisDevice";
+
+type SettingKey = keyof GoogleHealthSyncSettings | typeof SYNC_ON_THIS_DEVICE;
 
 export const DEFAULT_SETTINGS: GoogleHealthSyncSettings = {
-	enabled: false,
 	syncTime: "03:00",
 	lookBackDays: 3,
 	foodLogPath: "Data/Food Logs/FL-{YYYY}/FL-{YYYY}-{MM}/FL-{YYYY}-{MM}-{DD}.md",
@@ -82,10 +83,16 @@ export class GoogleHealthSyncSettingTab extends PluginSettingTab {
 	}
 
 	getControlValue(key: string): unknown {
-		return this.plugin.settings[key as SettingKey];
+		if (key === SYNC_ON_THIS_DEVICE) return this.plugin.isDailySyncOnThisDevice();
+		return this.plugin.settings[key as keyof GoogleHealthSyncSettings];
 	}
 
 	async setControlValue(key: string, value: unknown): Promise<void> {
+		if (key === SYNC_ON_THIS_DEVICE) {
+			this.plugin.setDailySyncOnThisDevice(value === true);
+			this.showSaved();
+			return;
+		}
 		(this.plugin.settings as unknown as Record<string, unknown>)[key] =
 			typeof value === "string" ? value.trim() : value;
 		await this.plugin.saveSettings();
@@ -105,11 +112,11 @@ export class GoogleHealthSyncSettingTab extends PluginSettingTab {
 				heading: "Daily sync",
 				items: [
 					{
-						name: "Enable daily sync",
-						desc: "Run once a day at the sync time. Connect your Google account first.",
+						name: "Run daily sync on this device",
+						desc: "Turn on for one device only, so two devices don't sync the same day at once. Stored on this device, not synced with the vault. Connect your Google account first.",
 						control: {
 							type: "toggle",
-							key: "enabled",
+							key: SYNC_ON_THIS_DEVICE,
 							disabled: () => !this.plugin.isConnected(),
 						},
 					},

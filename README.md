@@ -1,7 +1,7 @@
 # Google Health Sync
 
 An [Obsidian](https://obsidian.md) plugin that puts daily calories eaten and daily calories
-burned side by side, in both Google Health and your vault. Desktop only.
+burned side by side, in both Google Health and your vault. Works on desktop and mobile.
 
 Once a day (at a time you choose, default 03:00) it processes the previous day and does two
 independent jobs:
@@ -60,7 +60,9 @@ access token with read access to it (BRAT settings → **Personal access token**
    Obsidian.
 4. Settings shows **Connected** and whether all three permissions were granted. If one is
    missing, the job that needs it is skipped.
-5. Turn on **Enable daily sync**.
+5. Turn on **Run daily sync on this device** on the one device that should do the daily
+   sync. The switch is stored per device and is not synced with the vault, so other devices
+   stay off unless you turn them on too.
 
 The client secret and refresh token are kept in Obsidian's secret storage, not in the vault.
 
@@ -68,7 +70,7 @@ The client secret and refresh token are kept in Obsidian's secret storage, not i
 
 | Setting                        | Default                                                          | Notes                                                                             |
 | ------------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Enable daily sync              | Off                                                              | Can only be turned on once connected.                                             |
+| Run daily sync on this device  | Off                                                              | Per device (not synced). Turn on for one device only. Needs a connection.         |
 | Sync time                      | `03:00`                                                          | 24-hour local time.                                                               |
 | Look-back days                 | `3`                                                              | Days each run re-checks, 1–14.                                                    |
 | Food log path                  | `Data/Food Logs/FL-{YYYY}/FL-{YYYY}-{MM}/FL-{YYYY}-{MM}-{DD}.md` | `{YYYY}`, `{MM}`, `{DD}` are replaced with the date.                              |
@@ -98,6 +100,12 @@ yesterday plus the look-back window, and any days missed since the last successf
 to 14). After an error (network, rate limit, server) it retries no sooner than 15 minutes
 later. If Google access is revoked, the status shows **Reconnect needed** and syncing stops
 until you reconnect.
+
+**On mobile**, Obsidian only runs while it's open on screen, so there's no run at the exact
+sync time: the sync happens the next time you open Obsidian after it. If the phone's copy of
+the vault hasn't received a food log yet, that day shows "no food log" and a later run picks
+it up (it's inside the look-back window). Connect Google on each device you use: the
+sign-in is stored in that device's secret storage.
 
 Per-day results are logged to the developer console (verbose level) with a
 `[Google Health Sync]` prefix, and shown under **Status** in settings.

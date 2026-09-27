@@ -2,8 +2,9 @@
 
 Obsidian plugin (TypeScript, bundled with esbuild). Once a day it pushes a food log's
 `cal_total` to Google Health as a "Daily intake" nutrition entry and pulls total calories
-burned back into the same food log. Desktop-only (`isDesktopOnly: true`); OAuth uses a
-copy-paste authorization code. `README.md` has the user-facing behaviour and `STATUS.md`
+burned back into the same food log. Runs on desktop and mobile (`isDesktopOnly: false`, so no
+Node/Electron APIs); the daily sync is switched on per device via `app.saveLocalStorage`.
+OAuth uses a copy-paste authorization code. `README.md` has the user-facing behaviour and `STATUS.md`
 the implementation notes and API details still to verify live.
 
 ## Commands
